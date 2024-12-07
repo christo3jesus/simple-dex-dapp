@@ -90,6 +90,26 @@ const contractABI = [
     stateMutability: "view",
     type: "function",
   },
+  {
+    inputs: [
+      { internalType: "uint256", name: "amountA", type: "uint256" },
+      { internalType: "uint256", name: "amountB", type: "uint256" },
+    ],
+    name: "addLiquidity",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "uint256", name: "amountA", type: "uint256" },
+      { internalType: "uint256", name: "amountB", type: "uint256" },
+    ],
+    name: "removeLiquidity",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ];
 
 // Variables globales
@@ -208,3 +228,41 @@ async function getTokenBalance(tokenAddress) {
 document
   .getElementById("connectMetaMask")
   .addEventListener("click", connectMetaMask);
+
+async function handleLiquidityAction() {
+  const action = document.getElementById("liquidityAction").value; // Get selected action
+  const amountA = document.getElementById("amountA").value;
+  const amountB = document.getElementById("amountB").value;
+
+  if (!amountA || !amountB) {
+    alert("Please enter valid amounts for both tokens.");
+    return;
+  }
+
+  try {
+    const amountAInWei = ethers.parseUnits(amountA, 18);
+    const amountBInWei = ethers.parseUnits(amountB, 18);
+
+    const signer = provider.getSigner();
+
+    if (action === "add") {
+      // Add Liquidity Logic
+      const tx = await contract.addLiquidity(amountAInWei, amountBInWei);
+      await tx.wait();
+      alert("Liquidity added successfully!");
+    } else if (action === "remove") {
+      // Remove Liquidity Logic
+      const tx = await contract.removeLiquidity(amountAInWei, amountBInWei);
+      await tx.wait();
+      alert("Liquidity removed successfully!");
+    }
+  } catch (error) {
+    console.error(error);
+    alert(`Failed to ${action === "add" ? "add" : "remove"} liquidity.`);
+  }
+}
+
+// Event listener for the button
+document
+  .getElementById("liquidityActionBtn")
+  .addEventListener("click", handleLiquidityAction);

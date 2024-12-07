@@ -35,6 +35,43 @@
           <!-- Will be populated dynamically -->
         </div>
       </div>
+
+      <div id="liquidityModule" class="bg-gray-800 p-4 rounded-md text-white">
+        <h3 class="text-lg font-bold mb-4">Liquidity Management</h3>
+
+        <!-- Action Selector -->
+        <div class="mb-4">
+          <label for="liquidityAction" class="block mb-2">Select Action</label>
+          <select
+            id="liquidityAction"
+            class="w-full p-2 bg-gray-700 rounded-md text-white"
+          >
+            <option value="add">Add Liquidity</option>
+            <option value="remove">Remove Liquidity</option>
+          </select>
+        </div>
+
+        <!-- Liquidity Input -->
+        <div class="flex flex-col gap-2">
+          <input
+            type="number"
+            id="amountA"
+            min="1"
+            placeholder="Amount of Token A"
+            class="p-2 bg-gray-700 rounded-md"
+          />
+          <input
+            type="number"
+            id="amountB"
+            min="1"
+            placeholder="Amount of Token B"
+            class="p-2 bg-gray-700 rounded-md"
+          />
+          <button id="liquidityActionBtn" class="bg-blue-600 p-2 rounded-md">
+            Confirm Action
+          </button>
+        </div>
+      </div>
     </div>
   </body>
 </html>
