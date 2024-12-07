@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Contract UI on Sepolia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="scripts.js"></script>
+  </head>
+  <body class="bg-gray-900 text-white">
+    <div class="max-w-4xl mx-auto py-10 px-6">
+      <!-- Title -->
+      <h1 class="text-4xl font-bold text-center mb-8">
+        Smart Contract UI on Sepolia
+      </h1>
+
+      <!-- MetaMask Connect Module -->
+      <div class="bg-gray-800 p-6 rounded-lg shadow-lg mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Connect to MetaMask</h2>
+        <button
+          id="connectMetaMask"
+          class="w-full py-2 bg-yellow-600 hover:bg-yellow-700 rounded-md text-lg"
+        >
+          Connect MetaMask
+        </button>
+        <p id="status" class="mt-4 text-center text-sm text-gray-400 hidden">
+          Please connect your MetaMask wallet.
+        </p>
+      </div>
+
+      <!-- Contract Data Module -->
+      <div class="bg-gray-800 p-6 rounded-lg shadow-lg mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Contract Data</h2>
+        <div id="contractData" class="space-y-4">
+          <!-- Will be populated dynamically -->
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
