@@ -3,16 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Smart Contract UI on Sepolia</title>
+    <title>Simple DEX DApp</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module" src="scripts.js"></script>
   </head>
   <body class="bg-gray-900 text-white">
     <div class="max-w-4xl mx-auto py-10 px-6">
       <!-- Title -->
-      <h1 class="text-4xl font-bold text-center mb-8">
-        Smart Contract UI on Sepolia
-      </h1>
+      <h1 class="text-4xl font-bold text-center mb-8">Simple DEX DApp</h1>
 
       <!-- MetaMask Connect Module -->
       <div class="bg-gray-800 p-6 rounded-lg shadow-lg mb-8">
@@ -29,14 +27,20 @@
       </div>
 
       <!-- Contract Data Module -->
-      <div class="bg-gray-800 p-6 rounded-lg shadow-lg mb-8">
+      <div
+        id="dataModule"
+        class="bg-gray-800 p-6 rounded-lg shadow-lg mb-8 hidden"
+      >
         <h2 class="text-2xl font-semibold mb-4">Contract Data</h2>
         <div id="contractData" class="space-y-4">
           <!-- Will be populated dynamically -->
         </div>
       </div>
 
-      <div id="liquidityModule" class="bg-gray-800 p-4 rounded-md text-white">
+      <div
+        id="liquidityModule"
+        class="bg-gray-800 p-4 rounded-md text-white hidden"
+      >
         <h3 class="text-lg font-bold mb-4">Liquidity Management</h3>
 
         <!-- Action Selector -->

@@ -117,6 +117,9 @@ let provider;
 let signer;
 let contract;
 
+const contractDataSection = document.getElementById("liquidityModule");
+const liquidityManagementSection = document.getElementById("dataModule");
+
 // Conectar MetaMask
 async function connectMetaMask() {
   if (typeof window.ethereum === "undefined") {
@@ -149,7 +152,7 @@ async function connectMetaMask() {
     statusElement.classList.remove("hidden");
     statusElement.innerHTML = `
       Connected to MetaMask:
-      <p class="font-bold">${userAddress}</p>
+      <span class="font-bold">${userAddress}</span>
       <p class="ml-4 text-gray-300">Token A Balance: ${ethers.formatUnits(
         tokenABalance,
         18
@@ -159,6 +162,9 @@ async function connectMetaMask() {
         18
       )}</p>
     `;
+
+    contractDataSection.classList.remove("hidden");
+    liquidityManagementSection.classList.remove("hidden");
 
     // Cargar datos del contrato
     loadContractData();
@@ -256,6 +262,8 @@ async function handleLiquidityAction() {
       await tx.wait();
       alert("Liquidity removed successfully!");
     }
+    loadContractData();
+    connectMetaMask();
   } catch (error) {
     console.error(error);
     alert(`Failed to ${action === "add" ? "add" : "remove"} liquidity.`);
