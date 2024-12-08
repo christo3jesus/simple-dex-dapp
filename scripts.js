@@ -110,6 +110,20 @@ const contractABI = [
     stateMutability: "nonpayable",
     type: "function",
   },
+  {
+    inputs: [{ internalType: "uint256", name: "amountAIn", type: "uint256" }],
+    name: "swapAforB",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "uint256", name: "amountBIn", type: "uint256" }],
+    name: "swapBforA",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ];
 
 // Variables globales
@@ -119,6 +133,7 @@ let contract;
 
 const contractDataSection = document.getElementById("liquidityModule");
 const liquidityManagementSection = document.getElementById("dataModule");
+const tokenSwapSection = document.getElementById("swapModule");
 
 // Conectar MetaMask
 async function connectMetaMask() {
@@ -165,6 +180,7 @@ async function connectMetaMask() {
 
     contractDataSection.classList.remove("hidden");
     liquidityManagementSection.classList.remove("hidden");
+    tokenSwapSection.classList.remove("hidden");
 
     // Cargar datos del contrato
     loadContractData();
@@ -274,3 +290,41 @@ async function handleLiquidityAction() {
 document
   .getElementById("liquidityActionBtn")
   .addEventListener("click", handleLiquidityAction);
+
+async function handleSwapAction() {
+  const action = document.getElementById("swapAction").value; // Get selected action
+  const amountIn = document.getElementById("amountIn").value;
+
+  if (!amountIn) {
+    alert("Please enter valid amount for tokens.");
+    return;
+  }
+
+  try {
+    const amountInWei = ethers.parseUnits(amountIn, 18);
+
+    const signer = provider.getSigner();
+
+    if (action === "AtoB") {
+      // AtoB Logic
+      const tx = await contract.swapAforB(amountInWei);
+      await tx.wait();
+      alert("Swap to B successfully!");
+    } else if (action === "BtoA") {
+      // BtoA Logic
+      const tx = await contract.swapBforA(amountInWei);
+      await tx.wait();
+      alert("Swap to A successfully!");
+    }
+    loadContractData();
+    connectMetaMask();
+  } catch (error) {
+    console.error(error);
+    alert(`Failed to swap ${action === "AtoB" ? "AtoB" : "BtoA"} tokens.`);
+  }
+}
+
+// Event listener for the button
+document
+  .getElementById("swapActionButton")
+  .addEventListener("click", handleSwapAction);
