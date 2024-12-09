@@ -21,7 +21,11 @@
         >
           Connect MetaMask
         </button>
-        <p id="status" class="mt-4 text-center text-sm text-gray-400 hidden">
+        <p
+          id="status"
+          class="mt-4 text-center text-sm text-gray-400 hidden"
+          aria-live="polite"
+        >
           Please connect your MetaMask wallet.
         </p>
       </div>
@@ -30,6 +34,7 @@
       <div
         id="dataModule"
         class="bg-gray-800 p-6 rounded-lg shadow-lg mb-8 hidden"
+        aria-hidden="true"
       >
         <h2 class="text-2xl font-semibold mb-4">Contract Data</h2>
         <div id="contractData" class="space-y-4">
@@ -37,13 +42,13 @@
         </div>
       </div>
 
+      <!-- Liquidity Management Module -->
       <div
         id="liquidityModule"
         class="bg-gray-800 p-4 rounded-md text-white hidden"
+        aria-hidden="true"
       >
         <h3 class="text-lg font-bold mb-4">Liquidity Management</h3>
-
-        <!-- Action Selector -->
         <div class="mb-4">
           <label for="liquidityAction" class="block mb-2">Select Action</label>
           <select
@@ -54,9 +59,8 @@
             <option value="remove">Remove Liquidity</option>
           </select>
         </div>
-
-        <!-- Liquidity Input -->
         <div class="flex flex-col gap-2">
+          <label for="amountA" class="sr-only">Amount of Token A</label>
           <input
             type="number"
             id="amountA"
@@ -64,6 +68,7 @@
             placeholder="Amount of Token A"
             class="p-2 bg-gray-700 rounded-md"
           />
+          <label for="amountB" class="sr-only">Amount of Token B</label>
           <input
             type="number"
             id="amountB"
@@ -77,13 +82,13 @@
         </div>
       </div>
 
+      <!-- Token Swap Module -->
       <div
         id="swapModule"
         class="bg-gray-800 p-4 rounded-md text-white mt-8 hidden"
+        aria-hidden="true"
       >
         <h3 class="text-lg font-bold mb-4">Swap Tokens</h3>
-
-        <!-- Action Selector -->
         <div class="mb-4">
           <label for="swapAction" class="block mb-2">Select Action</label>
           <select
@@ -94,9 +99,8 @@
             <option value="BtoA">Token B for Token A</option>
           </select>
         </div>
-
-        <!-- Swap Input -->
         <div class="flex flex-col gap-2">
+          <label for="amountIn" class="sr-only">Token Amount</label>
           <input
             type="number"
             id="amountIn"
@@ -104,7 +108,6 @@
             placeholder="Token amount"
             class="p-2 bg-gray-700 rounded-md"
           />
-
           <button id="swapActionButton" class="bg-purple-600 p-2 rounded-md">
             Confirm Swap
           </button>

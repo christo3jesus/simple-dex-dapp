@@ -1,10 +1,13 @@
 import { ethers } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js";
 
-// Dirección del contrato en Sepolia
-const contractAddress = "0x639D16C51bE7dd92886880061894eCA58C7B0b61";
+/**
+ * Constants
+ */
+// Contract address on the Sepolia network
+const CONTRACT_ADDRESS = "0x639D16C51bE7dd92886880061894eCA58C7B0b61";
 
-// ABI del contrato
-const contractABI = [
+// Contract ABI (Application Binary Interface)
+const CONTRACT_ABI = [
   {
     inputs: [
       { internalType: "address", name: "_tokenA", type: "address" },
@@ -12,41 +15,6 @@ const contractABI = [
     ],
     stateMutability: "nonpayable",
     type: "constructor",
-  },
-  {
-    inputs: [{ internalType: "address", name: "owner", type: "address" }],
-    name: "OwnableInvalidOwner",
-    type: "error",
-  },
-  {
-    inputs: [{ internalType: "address", name: "account", type: "address" }],
-    name: "OwnableUnauthorizedAccount",
-    type: "error",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "provider",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amountA",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amountB",
-        type: "uint256",
-      },
-    ],
-    name: "LiquidityAdded",
-    type: "event",
   },
   {
     inputs: [],
@@ -111,14 +79,14 @@ const contractABI = [
     type: "function",
   },
   {
-    inputs: [{ internalType: "uint256", name: "amountAIn", type: "uint256" }],
+    inputs: [{ internalType: "uint256", name: "amountA", type: "uint256" }],
     name: "swapAforB",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
   {
-    inputs: [{ internalType: "uint256", name: "amountBIn", type: "uint256" }],
+    inputs: [{ internalType: "uint256", name: "amountB", type: "uint256" }],
     name: "swapBforA",
     outputs: [],
     stateMutability: "nonpayable",
@@ -126,48 +94,63 @@ const contractABI = [
   },
 ];
 
-// Variables globales
-let provider;
-let signer;
-let contract;
+// Global variables
+let provider, signer, contract;
 
+// UI Elements
 const contractDataSection = document.getElementById("liquidityModule");
 const liquidityManagementSection = document.getElementById("dataModule");
 const tokenSwapSection = document.getElementById("swapModule");
 
-// Conectar MetaMask
+/**
+ * Initialize connection with MetaMask
+ */
 async function connectMetaMask() {
-  if (typeof window.ethereum === "undefined") {
+  if (!window.ethereum) {
     alert("MetaMask not detected. Please install MetaMask to continue.");
     return;
   }
 
   try {
-    // Solicitar conexión a MetaMask
+    // Request connection to MetaMask
     await window.ethereum.request({ method: "eth_requestAccounts" });
 
-    // Crear proveedor y firmante
+    // Setup provider, signer, and contract instance
     provider = new ethers.BrowserProvider(window.ethereum);
     signer = await provider.getSigner();
+    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
-    // Crear una instancia del contrato
-    contract = new ethers.Contract(contractAddress, contractABI, signer);
-
-    // Obtener la dirección del usuario conectado
+    // Fetch and display user data
     const userAddress = await signer.getAddress();
+    await updateUserBalances(userAddress);
 
-    // Obtener los balances de Token A y Token B
+    // Display contract data
+    contractDataSection.classList.remove("hidden");
+    liquidityManagementSection.classList.remove("hidden");
+    tokenSwapSection.classList.remove("hidden");
+
+    loadContractData();
+  } catch (error) {
+    console.error(error);
+    alert("Failed to connect to MetaMask.");
+  }
+}
+
+/**
+ * Fetch and update user token balances
+ * @param {string} userAddress - User's Ethereum address
+ */
+async function updateUserBalances(userAddress) {
+  try {
     const tokenAAddress = await contract.tokenA();
     const tokenBAddress = await contract.tokenB();
-    const tokenABalance = await getTokenBalance(tokenAAddress);
-    const tokenBBalance = await getTokenBalance(tokenBAddress);
+    const tokenABalance = await getTokenBalance(tokenAAddress, userAddress);
+    const tokenBBalance = await getTokenBalance(tokenBAddress, userAddress);
 
-    // Actualizar el estado en la UI
     const statusElement = document.getElementById("status");
     statusElement.classList.remove("hidden");
     statusElement.innerHTML = `
-      Connected to MetaMask:
-      <span class="font-bold">${userAddress}</span>
+      Connected to MetaMask: <span class="font-bold">${userAddress}</span>
       <p class="ml-4 text-gray-300">Token A Balance: ${ethers.formatUnits(
         tokenABalance,
         18
@@ -177,38 +160,24 @@ async function connectMetaMask() {
         18
       )}</p>
     `;
-
-    contractDataSection.classList.remove("hidden");
-    liquidityManagementSection.classList.remove("hidden");
-    tokenSwapSection.classList.remove("hidden");
-
-    // Cargar datos del contrato
-    loadContractData();
   } catch (error) {
-    console.error(error);
-    alert("Failed to connect to MetaMask.");
+    console.error("Error updating balances:", error);
   }
 }
 
-// Cargar los datos del contrato
+/**
+ * Load and display contract data
+ */
 async function loadContractData() {
   try {
-    // Obtener las direcciones de los tokens A y B
     const tokenAAddress = await contract.tokenA();
     const tokenBAddress = await contract.tokenB();
-
-    // Obtener reservas del contrato
     const reserveA = await contract.reserveA();
     const reserveB = await contract.reserveB();
-
-    // Obtener precios de los tokens usando la función getPrice
-    const priceA = await contract.getPrice(tokenAAddress); // Precio de A en términos de B
-    const priceB = await contract.getPrice(tokenBAddress); // Precio de B en términos de A
-
-    // Obtener el propietario del contrato
+    const priceA = await contract.getPrice(tokenAAddress);
+    const priceB = await contract.getPrice(tokenBAddress);
     const owner = await contract.owner();
 
-    // Mostrar los datos en la interfaz
     const contractDataDiv = document.getElementById("contractData");
     contractDataDiv.innerHTML = `
       <p>Contract Owner: ${owner}</p>
@@ -219,40 +188,38 @@ async function loadContractData() {
       <p>Price of Token A (in Token B): ${ethers.formatUnits(priceA, 18)}</p>
       <p>Price of Token B (in Token A): ${ethers.formatUnits(priceB, 18)}</p>
     `;
+    connectMetaMask();
   } catch (error) {
-    console.error(error);
-    alert("Failed to fetch contract data.");
+    console.error("Failed to load contract data:", error);
+    alert("Error fetching contract data.");
   }
 }
 
-// Obtener el balance de un token ERC20
-async function getTokenBalance(tokenAddress) {
+/**
+ * Get ERC20 token balance for a specific user
+ * @param {string} tokenAddress - Token contract address
+ * @param {string} userAddress - User's Ethereum address
+ * @returns {Promise<BigNumber>} Token balance
+ */
+async function getTokenBalance(tokenAddress, userAddress) {
   try {
-    // Crear contrato ERC20 para obtener el balance
     const tokenContract = new ethers.Contract(
       tokenAddress,
       ["function balanceOf(address owner) view returns (uint256)"],
       signer
     );
-
-    // Obtener el balance del usuario conectado
-    const userAddress = await signer.getAddress();
-    const balance = await tokenContract.balanceOf(userAddress);
-
-    return balance;
+    return await tokenContract.balanceOf(userAddress);
   } catch (error) {
-    console.error("Error getting token balance", error);
-    return ethers.BigNumber.from(0); // Si hay un error, retornamos 0
+    console.error("Error getting token balance:", error);
+    return ethers.BigNumber.from(0); // Return 0 on error
   }
 }
 
-// Asignar la función de conexión al botón
-document
-  .getElementById("connectMetaMask")
-  .addEventListener("click", connectMetaMask);
-
+/**
+ * Handle liquidity actions (add/remove)
+ */
 async function handleLiquidityAction() {
-  const action = document.getElementById("liquidityAction").value; // Get selected action
+  const action = document.getElementById("liquidityAction").value;
   const amountA = document.getElementById("amountA").value;
   const amountB = document.getElementById("amountB").value;
 
@@ -265,66 +232,62 @@ async function handleLiquidityAction() {
     const amountAInWei = ethers.parseUnits(amountA, 18);
     const amountBInWei = ethers.parseUnits(amountB, 18);
 
-    const signer = provider.getSigner();
-
     if (action === "add") {
-      // Add Liquidity Logic
       const tx = await contract.addLiquidity(amountAInWei, amountBInWei);
       await tx.wait();
       alert("Liquidity added successfully!");
     } else if (action === "remove") {
-      // Remove Liquidity Logic
       const tx = await contract.removeLiquidity(amountAInWei, amountBInWei);
       await tx.wait();
       alert("Liquidity removed successfully!");
     }
     loadContractData();
-    connectMetaMask();
   } catch (error) {
-    console.error(error);
+    console.error("Liquidity action failed:", error);
     alert(`Failed to ${action === "add" ? "add" : "remove"} liquidity.`);
   }
 }
 
-// Event listener for the button
-document
-  .getElementById("liquidityActionBtn")
-  .addEventListener("click", handleLiquidityAction);
-
+/**
+ * Handle token swap actions (A -> B or B -> A)
+ */
 async function handleSwapAction() {
-  const action = document.getElementById("swapAction").value; // Get selected action
+  const action = document.getElementById("swapAction").value;
   const amountIn = document.getElementById("amountIn").value;
 
   if (!amountIn) {
-    alert("Please enter valid amount for tokens.");
+    alert("Please enter a valid token amount.");
     return;
   }
 
   try {
     const amountInWei = ethers.parseUnits(amountIn, 18);
 
-    const signer = provider.getSigner();
-
     if (action === "AtoB") {
-      // AtoB Logic
       const tx = await contract.swapAforB(amountInWei);
       await tx.wait();
-      alert("Swap to B successfully!");
+      alert("Swap from A to B completed!");
     } else if (action === "BtoA") {
-      // BtoA Logic
       const tx = await contract.swapBforA(amountInWei);
       await tx.wait();
-      alert("Swap to A successfully!");
+      alert("Swap from B to A completed!");
     }
     loadContractData();
-    connectMetaMask();
   } catch (error) {
-    console.error(error);
-    alert(`Failed to swap ${action === "AtoB" ? "AtoB" : "BtoA"} tokens.`);
+    console.error("Token swap failed:", error);
+    alert(`Failed to swap tokens: ${action}.`);
   }
 }
 
-// Event listener for the button
+/**
+ * Event Listeners
+ */
+document
+  .getElementById("connectMetaMask")
+  .addEventListener("click", connectMetaMask);
+document
+  .getElementById("liquidityActionBtn")
+  .addEventListener("click", handleLiquidityAction);
 document
   .getElementById("swapActionButton")
   .addEventListener("click", handleSwapAction);
